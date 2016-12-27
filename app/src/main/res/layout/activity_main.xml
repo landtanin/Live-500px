@@ -19,7 +19,7 @@
         android:layout_gravity="start"
         android:background="#ffffff"
         android:orientation="vertical"
-        android:layout_width="320dp"
+        android:layout_width="@dimen/drawer_menu_width"
         android:layout_height="match_parent">
 
         <Button
