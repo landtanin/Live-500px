@@ -5,14 +5,19 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import com.landtanin.practice2.R;
+import com.landtanin.practice2.adapter.PhotoListAdapter;
 
 
 /**
  * Created by nuuneoi on 11/16/2014.
  */
 public class MainFragment extends Fragment {
+
+    ListView mListView;
+    PhotoListAdapter mPhotoListAdapter;
 
     public MainFragment() {
         super();
@@ -35,6 +40,10 @@ public class MainFragment extends Fragment {
 
     private void initInstances(View rootView) {
         // Init 'View' instance(s) with rootView.findViewById here
+        mListView = (ListView) rootView.findViewById(R.id.listView);
+        mPhotoListAdapter = new PhotoListAdapter();
+        mListView.setAdapter(mPhotoListAdapter);
+
     }
 
     @Override
