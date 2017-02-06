@@ -6,9 +6,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.inthecheesefactory.thecheeselibrary.manager.Contextor;
 import com.landtanin.practice2.R;
 import com.landtanin.practice2.adapter.PhotoListAdapter;
+import com.landtanin.practice2.dao.PhotoItemCollectionDao;
+import com.landtanin.practice2.manager.HttpMangaer;
+
+import java.io.IOException;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 /**
@@ -43,6 +53,42 @@ public class MainFragment extends Fragment {
         mListView = (ListView) rootView.findViewById(R.id.listView);
         mPhotoListAdapter = new PhotoListAdapter();
         mListView.setAdapter(mPhotoListAdapter);
+
+        Call<PhotoItemCollectionDao> call = HttpMangaer.getInstance().getService().loadPhotoList();
+        call.enqueue(new Callback<PhotoItemCollectionDao>() {
+            @Override
+            public void onResponse(Call<PhotoItemCollectionDao> call, Response<PhotoItemCollectionDao> response) {
+
+                if (response.isSuccessful()) {
+                    PhotoItemCollectionDao dao = response.body();
+                    Toast.makeText(Contextor.getInstance().getContext(),
+                            dao.getData().get(0).getCaption(),
+                            Toast.LENGTH_SHORT)
+                            .show();
+
+                } else {
+                    try {
+                        Toast.makeText(Contextor.getInstance().getContext(),
+                                response.errorBody().string(),
+                                Toast.LENGTH_SHORT)
+                                .show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<PhotoItemCollectionDao> call, Throwable t) {
+
+                Toast.makeText(Contextor.getInstance().getContext(),
+                        t.toString(),
+                        Toast.LENGTH_SHORT)
+                        .show();
+
+            }
+        });
 
     }
 

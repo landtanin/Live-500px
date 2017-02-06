@@ -1,5 +1,7 @@
 package com.landtanin.practice2.manager.http;
 
+import com.landtanin.practice2.dao.PhotoItemCollectionDao;
+
 import retrofit2.Call;
 import retrofit2.http.POST;
 
@@ -10,6 +12,6 @@ import retrofit2.http.POST;
 public interface ApiService {
 
     @POST("list")
-    Call<Object>  loadPhotoList();
+    Call<PhotoItemCollectionDao>  loadPhotoList();
 
 }
