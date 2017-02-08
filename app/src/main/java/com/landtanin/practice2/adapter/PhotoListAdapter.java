@@ -4,8 +4,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.landtanin.practice2.dao.PhotoItemCollectionDao;
 import com.landtanin.practice2.dao.PhotoItemDao;
-import com.landtanin.practice2.manager.PhotoListManager;
 import com.landtanin.practice2.view.PhotoListItem;
 
 /**
@@ -13,22 +13,29 @@ import com.landtanin.practice2.view.PhotoListItem;
  */
 
 public class PhotoListAdapter extends BaseAdapter {
+
+    PhotoItemCollectionDao dao;
+
+    public void setDao(PhotoItemCollectionDao dao) {
+        this.dao = dao;
+    }
+
     @Override
     public int getCount() {
 
-        if (PhotoListManager.getInstance().getPhotoItemCollectionDao() == null) {
+        if (dao == null) {
             return 0;
         }
-        if (PhotoListManager.getInstance().getPhotoItemCollectionDao().getData() == null) {
+        if (dao == null) {
             return 0;
         }
 
-        return PhotoListManager.getInstance().getPhotoItemCollectionDao().getData().size();
+        return dao.getData().size();
     }
 
     @Override
     public Object getItem(int i) {
-        return PhotoListManager.getInstance().getPhotoItemCollectionDao().getData().get(i);
+        return dao.getData().get(i);
     }
 
     @Override

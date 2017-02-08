@@ -13,7 +13,6 @@ import com.landtanin.practice2.R;
 import com.landtanin.practice2.adapter.PhotoListAdapter;
 import com.landtanin.practice2.dao.PhotoItemCollectionDao;
 import com.landtanin.practice2.manager.HttpMangaer;
-import com.landtanin.practice2.manager.PhotoListManager;
 
 import java.io.IOException;
 
@@ -62,7 +61,7 @@ public class MainFragment extends Fragment {
 
                 if (response.isSuccessful()) {
                     PhotoItemCollectionDao dao = response.body();
-                    PhotoListManager.getInstance().setPhotoItemCollectionDao(dao);
+                    mPhotoListAdapter.setDao(dao);
                     mPhotoListAdapter.notifyDataSetChanged();
                     Toast.makeText(Contextor.getInstance().getContext(),
                             dao.getData().get(0).getCaption(),
