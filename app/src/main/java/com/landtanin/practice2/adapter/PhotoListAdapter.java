@@ -4,6 +4,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.landtanin.practice2.dao.PhotoItemDao;
+import com.landtanin.practice2.manager.PhotoListManager;
 import com.landtanin.practice2.view.PhotoListItem;
 
 /**
@@ -13,12 +15,20 @@ import com.landtanin.practice2.view.PhotoListItem;
 public class PhotoListAdapter extends BaseAdapter {
     @Override
     public int getCount() {
-        return 10000;
+
+        if (PhotoListManager.getInstance().getPhotoItemCollectionDao() == null) {
+            return 0;
+        }
+        if (PhotoListManager.getInstance().getPhotoItemCollectionDao().getData() == null) {
+            return 0;
+        }
+
+        return PhotoListManager.getInstance().getPhotoItemCollectionDao().getData().size();
     }
 
     @Override
     public Object getItem(int i) {
-        return null;
+        return PhotoListManager.getInstance().getPhotoItemCollectionDao().getData().get(i);
     }
 
     @Override
@@ -30,6 +40,7 @@ public class PhotoListAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
+
         PhotoListItem item;
 
             if (view != null) {
@@ -40,7 +51,11 @@ public class PhotoListAdapter extends BaseAdapter {
                 item = new PhotoListItem(viewGroup.getContext());
             }
 
-            return item;
+        PhotoItemDao dao = (PhotoItemDao) getItem(i);
+        item.setNameText(dao.getCaption());
+        item.setDescriptionText(dao.getUserName() + "\n" + dao.getCamera());
+        item.setImageUrl(dao.getImageUrl());
+        return item;
     }
 
     // --------------multiple ListView type--------------
