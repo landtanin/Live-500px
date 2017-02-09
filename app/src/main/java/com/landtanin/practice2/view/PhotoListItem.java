@@ -113,7 +113,10 @@ public class PhotoListItem extends BaseCustomViewGroup {
 
     public void setImageUrl(String url) {
 
-        Glide.with(getContext()).load(url).into(ivImg);
+        Glide.with(getContext())
+                .load(url)
+                .placeholder(R.drawable.loading_icon_03_512)
+                .into(ivImg);
 
     }
 

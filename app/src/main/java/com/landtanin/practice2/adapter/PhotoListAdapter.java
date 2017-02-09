@@ -2,8 +2,11 @@ package com.landtanin.practice2.adapter;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 
+import com.landtanin.practice2.R;
 import com.landtanin.practice2.dao.PhotoItemCollectionDao;
 import com.landtanin.practice2.dao.PhotoItemDao;
 import com.landtanin.practice2.view.PhotoListItem;
@@ -62,6 +65,10 @@ public class PhotoListAdapter extends BaseAdapter {
         item.setNameText(dao.getCaption());
         item.setDescriptionText(dao.getUserName() + "\n" + dao.getCamera());
         item.setImageUrl(dao.getImageUrl());
+
+        Animation anim = AnimationUtils.loadAnimation(viewGroup.getContext(), R.anim.up_from_bottom);
+        item.startAnimation(anim);
+
         return item;
     }
 
