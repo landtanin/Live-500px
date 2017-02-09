@@ -18,6 +18,7 @@ import com.landtanin.practice2.view.PhotoListItem;
 public class PhotoListAdapter extends BaseAdapter {
 
     PhotoItemCollectionDao dao;
+    int latestPosition = -1;
 
     public void setDao(PhotoItemCollectionDao dao) {
         this.dao = dao;
@@ -66,8 +67,15 @@ public class PhotoListAdapter extends BaseAdapter {
         item.setDescriptionText(dao.getUserName() + "\n" + dao.getCamera());
         item.setImageUrl(dao.getImageUrl());
 
-        Animation anim = AnimationUtils.loadAnimation(viewGroup.getContext(), R.anim.up_from_bottom);
-        item.startAnimation(anim);
+        if (i>latestPosition) {
+
+            Animation anim = AnimationUtils.loadAnimation(viewGroup.getContext(), R.anim.up_from_bottom);
+            item.startAnimation(anim);
+
+            latestPosition = i;
+
+        }
+
 
         return item;
     }
