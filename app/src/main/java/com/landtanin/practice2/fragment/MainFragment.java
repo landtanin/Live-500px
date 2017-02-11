@@ -15,6 +15,7 @@ import com.landtanin.practice2.R;
 import com.landtanin.practice2.adapter.PhotoListAdapter;
 import com.landtanin.practice2.dao.PhotoItemCollectionDao;
 import com.landtanin.practice2.manager.HttpMangaer;
+import com.landtanin.practice2.manager.PhotoListManager;
 
 import java.io.IOException;
 
@@ -31,6 +32,7 @@ public class MainFragment extends Fragment {
     ListView mListView;
     PhotoListAdapter mPhotoListAdapter;
     SwipeRefreshLayout mSwipeRefreshLayout;
+    PhotoListManager mPhotoListManager;
 
     public MainFragment() {
         super();
@@ -53,16 +55,18 @@ public class MainFragment extends Fragment {
 
     private void initInstances(View rootView) {
         // Init 'View' instance(s) with rootView.findViewById here
+        mPhotoListManager = new PhotoListManager();
+
         mListView = (ListView) rootView.findViewById(R.id.listView);
         mPhotoListAdapter = new PhotoListAdapter();
         mListView.setAdapter(mPhotoListAdapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.mainFragSwipeRefreshLayout);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeRefreshLayout.setOnRefreshListener( new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
 
-                reloadData();
+                refreshData();
 
             }
         });
@@ -73,6 +77,7 @@ public class MainFragment extends Fragment {
 
             }
 
+
             @Override
             public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 
@@ -81,7 +86,66 @@ public class MainFragment extends Fragment {
             }
         });
 
-        reloadData();
+        refreshData();
+
+    }
+
+    private void refreshData() {
+        if (mPhotoListManager.getCount() == 0) {
+            reloadData();
+        }
+        else
+            reloadDataNewer();
+    }
+
+    private void reloadDataNewer() {
+
+        int maxId = mPhotoListManager.getMaximumId();
+        Call<PhotoItemCollectionDao> call = HttpMangaer.getInstance()
+                .getService()
+                .loadPhotoListAfterId(maxId);
+
+        call.enqueue(new Callback<PhotoItemCollectionDao>() {
+            @Override
+            public void onResponse(Call<PhotoItemCollectionDao> call, Response<PhotoItemCollectionDao> response) {
+
+                mSwipeRefreshLayout.setRefreshing(false);
+
+                if (response.isSuccessful()) {
+                    PhotoItemCollectionDao dao = response.body();
+                    mPhotoListManager.insertDaoAtTopPosition(dao);
+                    mPhotoListAdapter.setDao(mPhotoListManager.getPhotoItemCollectionDao());    // feed the updated dao to PhotoListAdapter
+                    mPhotoListAdapter.notifyDataSetChanged();
+                    Toast.makeText(Contextor.getInstance().getContext(),
+                            "download completed",
+                            Toast.LENGTH_SHORT)
+                            .show();
+
+                } else {
+                    try {
+                        Toast.makeText(Contextor.getInstance().getContext(),
+                                response.errorBody().string(),
+                                Toast.LENGTH_SHORT)
+                                .show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<PhotoItemCollectionDao> call, Throwable t) {
+
+                mSwipeRefreshLayout.setRefreshing(false);
+
+                Toast.makeText(Contextor.getInstance().getContext(),
+                        t.toString(),
+                        Toast.LENGTH_SHORT)
+                        .show();
+
+            }
+        });
 
     }
 
@@ -94,6 +158,7 @@ public class MainFragment extends Fragment {
 
                 if (response.isSuccessful()) {
                     PhotoItemCollectionDao dao = response.body();
+                    mPhotoListManager.setPhotoItemCollectionDao(dao);
                     mPhotoListAdapter.setDao(dao);
                     mPhotoListAdapter.notifyDataSetChanged();
                     Toast.makeText(Contextor.getInstance().getContext(),
