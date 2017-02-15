@@ -98,6 +98,67 @@ public class MainFragment extends Fragment {
             reloadDataNewer();
     }
 
+    class PhotoListCallback implements Callback<PhotoItemCollectionDao> {
+
+        public static final int MODE_RELOAD = 1;
+        public static final int MODE_RELOAD_NEWER = 2;
+
+        int mode;
+
+        public PhotoListCallback(int mode) {
+
+            this.mode = mode;
+
+        }
+
+
+        @Override
+
+        public void onResponse(Call<PhotoItemCollectionDao> call, Response<PhotoItemCollectionDao> response) {
+
+            mSwipeRefreshLayout.setRefreshing(false);
+
+            if (response.isSuccessful()) {
+                PhotoItemCollectionDao dao = response.body();
+                if (mode == MODE_RELOAD_NEWER) {
+                    mPhotoListManager.insertDaoAtTopPosition(dao);
+                } else {
+                    mPhotoListManager.setPhotoItemCollectionDao(dao);
+                }
+
+                mPhotoListAdapter.setDao(mPhotoListManager.getPhotoItemCollectionDao());    // feed the updated dao to PhotoListAdapter
+                mPhotoListAdapter.notifyDataSetChanged();
+                Toast.makeText(Contextor.getInstance().getContext(),
+                        "download completed",
+                        Toast.LENGTH_SHORT)
+                        .show();
+
+            } else {
+                try {
+                    Toast.makeText(Contextor.getInstance().getContext(),
+                            response.errorBody().string(),
+                            Toast.LENGTH_SHORT)
+                            .show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<PhotoItemCollectionDao> call, Throwable t) {
+
+            mSwipeRefreshLayout.setRefreshing(false);
+
+            Toast.makeText(Contextor.getInstance().getContext(),
+                    t.toString(),
+                    Toast.LENGTH_SHORT)
+                    .show();
+
+        }
+    }
+
+
     private void reloadDataNewer() {
 
         int maxId = mPhotoListManager.getMaximumId();
@@ -105,92 +166,13 @@ public class MainFragment extends Fragment {
                 .getService()
                 .loadPhotoListAfterId(maxId);
 
-        call.enqueue(new Callback<PhotoItemCollectionDao>() {
-            @Override
-            public void onResponse(Call<PhotoItemCollectionDao> call, Response<PhotoItemCollectionDao> response) {
-
-                mSwipeRefreshLayout.setRefreshing(false);
-
-                if (response.isSuccessful()) {
-                    PhotoItemCollectionDao dao = response.body();
-                    mPhotoListManager.insertDaoAtTopPosition(dao);
-                    mPhotoListAdapter.setDao(mPhotoListManager.getPhotoItemCollectionDao());    // feed the updated dao to PhotoListAdapter
-                    mPhotoListAdapter.notifyDataSetChanged();
-                    Toast.makeText(Contextor.getInstance().getContext(),
-                            "download completed",
-                            Toast.LENGTH_SHORT)
-                            .show();
-
-                } else {
-                    try {
-                        Toast.makeText(Contextor.getInstance().getContext(),
-                                response.errorBody().string(),
-                                Toast.LENGTH_SHORT)
-                                .show();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<PhotoItemCollectionDao> call, Throwable t) {
-
-                mSwipeRefreshLayout.setRefreshing(false);
-
-                Toast.makeText(Contextor.getInstance().getContext(),
-                        t.toString(),
-                        Toast.LENGTH_SHORT)
-                        .show();
-
-            }
-        });
+        call.enqueue(new PhotoListCallback(PhotoListCallback.MODE_RELOAD_NEWER));
 
     }
 
     private void reloadData() {
         Call<PhotoItemCollectionDao> call = HttpMangaer.getInstance().getService().loadPhotoList();
-        call.enqueue(new Callback<PhotoItemCollectionDao>() {
-            @Override
-            public void onResponse(Call<PhotoItemCollectionDao> call, Response<PhotoItemCollectionDao> response) {
-                mSwipeRefreshLayout.setRefreshing(false);
-
-                if (response.isSuccessful()) {
-                    PhotoItemCollectionDao dao = response.body();
-                    mPhotoListManager.setPhotoItemCollectionDao(dao);
-                    mPhotoListAdapter.setDao(dao);
-                    mPhotoListAdapter.notifyDataSetChanged();
-                    Toast.makeText(Contextor.getInstance().getContext(),
-                            dao.getData().get(0).getCaption(),
-                            Toast.LENGTH_SHORT)
-                            .show();
-
-                } else {
-                    try {
-                        Toast.makeText(Contextor.getInstance().getContext(),
-                                response.errorBody().string(),
-                                Toast.LENGTH_SHORT)
-                                .show();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<PhotoItemCollectionDao> call, Throwable t) {
-
-                mSwipeRefreshLayout.setRefreshing(false);
-
-                Toast.makeText(Contextor.getInstance().getContext(),
-                        t.toString(),
-                        Toast.LENGTH_SHORT)
-                        .show();
-
-            }
-        });
+        call.enqueue(new PhotoListCallback(PhotoListCallback.MODE_RELOAD));
     }
 
     @Override
