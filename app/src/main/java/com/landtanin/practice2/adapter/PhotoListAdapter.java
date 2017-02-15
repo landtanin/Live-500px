@@ -80,6 +80,12 @@ public class PhotoListAdapter extends BaseAdapter {
         return item;
     }
 
+    public void increaseLastPosition(int amount){
+
+        latestPosition += amount;
+
+    }
+
     // --------------multiple ListView type--------------
 
 //    @Override

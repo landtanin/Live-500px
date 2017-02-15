@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -33,6 +34,7 @@ public class MainFragment extends Fragment {
     PhotoListAdapter mPhotoListAdapter;
     SwipeRefreshLayout mSwipeRefreshLayout;
     PhotoListManager mPhotoListManager;
+    Button btnNewPhotos;
 
     public MainFragment() {
         super();
@@ -56,6 +58,15 @@ public class MainFragment extends Fragment {
     private void initInstances(View rootView) {
         // Init 'View' instance(s) with rootView.findViewById here
         mPhotoListManager = new PhotoListManager();
+
+        btnNewPhotos = (Button) rootView.findViewById(R.id.btnNewPhotos);
+        btnNewPhotos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mListView.smoothScrollToPosition(0);
+                hideButtonNewPhotos();
+            }
+        });
 
         mListView = (ListView) rootView.findViewById(R.id.listView);
         mPhotoListAdapter = new PhotoListAdapter();
@@ -120,6 +131,12 @@ public class MainFragment extends Fragment {
 
             if (response.isSuccessful()) {
                 PhotoItemCollectionDao dao = response.body();
+
+                // maintain scroll position process
+                int firstVisiblePosition = mListView.getFirstVisiblePosition();
+                View c = mListView.getChildAt(0);
+                int top = c == null ? 0 : c.getTop();
+
                 if (mode == MODE_RELOAD_NEWER) {
                     mPhotoListManager.insertDaoAtTopPosition(dao);
                 } else {
@@ -128,6 +145,20 @@ public class MainFragment extends Fragment {
 
                 mPhotoListAdapter.setDao(mPhotoListManager.getPhotoItemCollectionDao());    // feed the updated dao to PhotoListAdapter
                 mPhotoListAdapter.notifyDataSetChanged();
+
+                // maintain scroll position process
+                if (mode == MODE_RELOAD_NEWER) {
+
+                    int additionalSize = (dao != null && dao.getData() != null) ? dao.getData().size() : 0;
+                    mPhotoListAdapter.increaseLastPosition(additionalSize);
+                    mListView.setSelectionFromTop(firstVisiblePosition + additionalSize, top);
+
+                    if (additionalSize>0) {
+                        showButtonNewPHotos();
+                    }
+
+                }
+
                 Toast.makeText(Contextor.getInstance().getContext(),
                         "download completed",
                         Toast.LENGTH_SHORT)
@@ -203,5 +234,13 @@ public class MainFragment extends Fragment {
         if (savedInstanceState != null) {
             // Restore Instance State here
         }
+    }
+
+    public void showButtonNewPHotos() {
+        btnNewPhotos.setVisibility(View.VISIBLE);
+    }
+
+    public void hideButtonNewPhotos() {
+        btnNewPhotos.setVisibility(View.GONE);
     }
 }
