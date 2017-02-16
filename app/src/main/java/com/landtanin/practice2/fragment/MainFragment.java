@@ -6,6 +6,8 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.ListView;
@@ -59,6 +61,8 @@ public class MainFragment extends Fragment {
         // Init 'View' instance(s) with rootView.findViewById here
         mPhotoListManager = new PhotoListManager();
 
+
+
         btnNewPhotos = (Button) rootView.findViewById(R.id.btnNewPhotos);
         btnNewPhotos.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,6 +71,8 @@ public class MainFragment extends Fragment {
                 hideButtonNewPhotos();
             }
         });
+
+
 
         mListView = (ListView) rootView.findViewById(R.id.listView);
         mPhotoListAdapter = new PhotoListAdapter();
@@ -96,6 +102,7 @@ public class MainFragment extends Fragment {
 
             }
         });
+
 
         refreshData();
 
@@ -154,7 +161,10 @@ public class MainFragment extends Fragment {
                     mListView.setSelectionFromTop(firstVisiblePosition + additionalSize, top);
 
                     if (additionalSize>0) {
+
+
                         showButtonNewPHotos();
+
                     }
 
                 }
@@ -237,10 +247,19 @@ public class MainFragment extends Fragment {
     }
 
     public void showButtonNewPHotos() {
+
+
         btnNewPhotos.setVisibility(View.VISIBLE);
+        Animation anim = AnimationUtils.loadAnimation(Contextor.getInstance().getContext(), R.anim.zoom_fade_in);
+        btnNewPhotos.startAnimation(anim);
+
     }
 
     public void hideButtonNewPhotos() {
+
         btnNewPhotos.setVisibility(View.GONE);
+        Animation anim = AnimationUtils.loadAnimation(Contextor.getInstance().getContext(), R.anim.zoom_fade_out);
+        btnNewPhotos.startAnimation(anim);
+
     }
 }
