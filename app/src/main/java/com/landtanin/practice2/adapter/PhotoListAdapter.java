@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
+import android.widget.ProgressBar;
 
 import com.landtanin.practice2.R;
 import com.landtanin.practice2.dao.PhotoItemCollectionDao;
@@ -28,13 +29,13 @@ public class PhotoListAdapter extends BaseAdapter {
     public int getCount() {
 
         if (dao == null) {
-            return 0;
+            return 1;
         }
-        if (dao == null) {
-            return 0;
+        if (dao.getData() == null) {
+            return 1;
         }
 
-        return dao.getData().size();
+        return dao.getData().size() + 1;
     }
 
     @Override
@@ -47,32 +48,56 @@ public class PhotoListAdapter extends BaseAdapter {
         return 0;
     }
 
+    @Override
+    public int getViewTypeCount() {
+        return 2;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position == getCount()-1 ? 1 : 0; // type 1 is ProgressBar, type 0 is normal PhotoListView
+    }
+
     // --------------single ListView type--------------
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
+    public View getView(int position, View convertView, ViewGroup parent) {
+
+        if (position == getCount()-1) {
+
+            // Progress Bar
+            ProgressBar item;
+            if (convertView != null) {
+                item = (ProgressBar) convertView;
+
+            } else {
+                item = new ProgressBar(parent.getContext());
+            }
+            return item;
+
+        }
 
         PhotoListItem item;
 
-            if (view != null) {
-                item = (PhotoListItem) view;
+            if (convertView != null) {
+                item = (PhotoListItem) convertView;
 
             }
             else {
-                item = new PhotoListItem(viewGroup.getContext());
+                item = new PhotoListItem(parent.getContext());
             }
 
-        PhotoItemDao dao = (PhotoItemDao) getItem(i);
+        PhotoItemDao dao = (PhotoItemDao) getItem(position);
         item.setNameText(dao.getCaption());
         item.setDescriptionText(dao.getUserName() + "\n" + dao.getCamera());
         item.setImageUrl(dao.getImageUrl());
 
-        if (i>latestPosition) {
+        if (position>latestPosition) {
 
-            Animation anim = AnimationUtils.loadAnimation(viewGroup.getContext(), R.anim.up_from_bottom);
+            Animation anim = AnimationUtils.loadAnimation(parent.getContext(), R.anim.up_from_bottom);
             item.startAnimation(anim);
 
-            latestPosition = i;
+            latestPosition = position;
 
         }
 

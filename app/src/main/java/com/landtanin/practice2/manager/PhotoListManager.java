@@ -53,6 +53,22 @@ public class PhotoListManager {
 
     }
 
+    public void appendDaoAtBottomPosition(PhotoItemCollectionDao newDao) {
+
+        if (mPhotoItemCollectionDao == null) {
+
+            mPhotoItemCollectionDao = new PhotoItemCollectionDao();
+        }
+        if (mPhotoItemCollectionDao.getData() == null) {
+
+            mPhotoItemCollectionDao.setData(new ArrayList<PhotoItemDao>());
+
+        }
+
+        mPhotoItemCollectionDao.getData().addAll(newDao.getData().size(), newDao.getData());
+
+    }
+
     public int getMaximumId() {
 
         // Handle null cases
@@ -72,6 +88,28 @@ public class PhotoListManager {
             maxId = Math.max(maxId, getPhotoItemCollectionDao().getData().get(i).getId());
         }
         return maxId;
+
+    }
+
+    public int getMinimumId() {
+
+        // Handle null cases
+        if (mPhotoItemCollectionDao == null) {
+            return 0;
+        }
+        if (mPhotoItemCollectionDao.getData() == null) {
+            return 0;
+        }
+        if (mPhotoItemCollectionDao.getData().size() == 0) {
+            return 0;
+        }
+
+        // calculation
+        int minId = mPhotoItemCollectionDao.getData().get(0).getId();
+        for (int i = 1; i < mPhotoItemCollectionDao.getData().size(); i++) {
+            minId = Math.min(minId, getPhotoItemCollectionDao().getData().get(i).getId());
+        }
+        return minId;
 
     }
 
