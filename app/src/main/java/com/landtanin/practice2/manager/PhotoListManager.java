@@ -1,6 +1,7 @@
 package com.landtanin.practice2.manager;
 
 import android.content.Context;
+import android.os.Bundle;
 
 import com.inthecheesefactory.thecheeselibrary.manager.Contextor;
 import com.landtanin.practice2.dao.PhotoItemCollectionDao;
@@ -123,6 +124,20 @@ public class PhotoListManager {
         }
 
         return mPhotoItemCollectionDao.getData().size();
+
+    }
+
+    public Bundle onSaveInstanceState(){
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("dao", mPhotoItemCollectionDao);
+        return bundle;
+
+    }
+
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+
+        mPhotoItemCollectionDao = savedInstanceState.getParcelable("dao");
 
     }
 
