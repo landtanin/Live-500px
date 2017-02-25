@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import com.landtanin.practice2.R;
 import com.landtanin.practice2.dao.PhotoItemCollectionDao;
 import com.landtanin.practice2.dao.PhotoItemDao;
+import com.landtanin.practice2.dataType.MutableInteger;
 import com.landtanin.practice2.view.PhotoListItem;
 
 /**
@@ -19,10 +20,15 @@ import com.landtanin.practice2.view.PhotoListItem;
 public class PhotoListAdapter extends BaseAdapter {
 
     PhotoItemCollectionDao dao;
-    int latestPosition = -1;
+    //    int latestPosition = -1;
+    MutableInteger lastPositionInteger;
 
     public void setDao(PhotoItemCollectionDao dao) {
         this.dao = dao;
+    }
+
+    public PhotoListAdapter(MutableInteger lastPositionInteger) {
+        this.lastPositionInteger = lastPositionInteger;
     }
 
     @Override
@@ -92,12 +98,13 @@ public class PhotoListAdapter extends BaseAdapter {
         item.setDescriptionText(dao.getUserName() + "\n" + dao.getCamera());
         item.setImageUrl(dao.getImageUrl());
 
-        if (position>latestPosition) {
+        if (position>lastPositionInteger.getValue()) {
 
             Animation anim = AnimationUtils.loadAnimation(parent.getContext(), R.anim.up_from_bottom);
             item.startAnimation(anim);
 
-            latestPosition = position;
+//            latestPosition = position;
+            lastPositionInteger.setValue(position);
 
         }
 
@@ -107,7 +114,8 @@ public class PhotoListAdapter extends BaseAdapter {
 
     public void increaseLastPosition(int amount){
 
-        latestPosition += amount;
+//        latestPosition += amount;
+        lastPositionInteger.setValue(lastPositionInteger.getValue()+amount);
 
     }
 

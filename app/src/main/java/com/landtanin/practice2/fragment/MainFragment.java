@@ -18,6 +18,7 @@ import com.inthecheesefactory.thecheeselibrary.manager.Contextor;
 import com.landtanin.practice2.R;
 import com.landtanin.practice2.adapter.PhotoListAdapter;
 import com.landtanin.practice2.dao.PhotoItemCollectionDao;
+import com.landtanin.practice2.dataType.MutableInteger;
 import com.landtanin.practice2.manager.HttpMangaer;
 import com.landtanin.practice2.manager.PhotoListManager;
 
@@ -41,6 +42,7 @@ public class MainFragment extends Fragment {
     PhotoListManager mPhotoListManager;
     Button btnNewPhotos;
     boolean isLoadingMore = false;
+    MutableInteger lastPositionInteger;
 
     /**************
      * Methods
@@ -61,7 +63,7 @@ public class MainFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPhotoListManager =  new PhotoListManager();
+        init(savedInstanceState);
 
         if (savedInstanceState != null) {
             onRestoreInstanceState(savedInstanceState);
@@ -74,18 +76,25 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        initInstances(rootView);
+        initInstances(rootView, savedInstanceState);
         return rootView;
     }
 
-    private void initInstances(View rootView) {
+    private void init(Bundle savedInstanceState) {
+
+        mPhotoListManager =  new PhotoListManager();
+        lastPositionInteger = new MutableInteger(-1);
+
+    }
+
+    private void initInstances(View rootView, Bundle savedInstanceState) {
         // Init 'View' instance(s) with rootView.findViewById here
 
         btnNewPhotos = (Button) rootView.findViewById(R.id.btnNewPhotos);
         btnNewPhotos.setOnClickListener(buttonClickListener);
 
         mListView = (ListView) rootView.findViewById(R.id.listView); // Fragment variable
-        mPhotoListAdapter = new PhotoListAdapter();
+        mPhotoListAdapter = new PhotoListAdapter(lastPositionInteger);
         mPhotoListAdapter.setDao(mPhotoListManager.getPhotoItemCollectionDao());
         mListView.setAdapter(mPhotoListAdapter);
 
@@ -94,7 +103,10 @@ public class MainFragment extends Fragment {
 
         mListView.setOnScrollListener(listViewScrollListener);
 
-        refreshData();
+        if (savedInstanceState == null) {
+            refreshData();
+        }
+
 
     }
 
@@ -156,6 +168,7 @@ public class MainFragment extends Fragment {
         super.onSaveInstanceState(outState);
         // Save Instance State here
         outState.putBundle("photoListManager", mPhotoListManager.onSaveInstanceState());
+        outState.putBundle("lastPositionInteger", lastPositionInteger.onSaveInstanceState());
 
     }
 
@@ -164,6 +177,7 @@ public class MainFragment extends Fragment {
         // Restore instance state here
 
         mPhotoListManager.onRestoreInstanceState(savedInstanceState.getBundle("photoListManager"));
+        lastPositionInteger.onRestoreInstanceState(savedInstanceState.getBundle("lastPositionInteger"));
 
     }
 
