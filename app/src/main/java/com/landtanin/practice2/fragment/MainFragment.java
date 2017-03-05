@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -18,6 +19,7 @@ import com.inthecheesefactory.thecheeselibrary.manager.Contextor;
 import com.landtanin.practice2.R;
 import com.landtanin.practice2.adapter.PhotoListAdapter;
 import com.landtanin.practice2.dao.PhotoItemCollectionDao;
+import com.landtanin.practice2.dao.PhotoItemDao;
 import com.landtanin.practice2.dataType.MutableInteger;
 import com.landtanin.practice2.manager.HttpMangaer;
 import com.landtanin.practice2.manager.PhotoListManager;
@@ -43,6 +45,10 @@ public class MainFragment extends Fragment {
     Button btnNewPhotos;
     boolean isLoadingMore = false;
     MutableInteger lastPositionInteger;
+
+    public interface FragmentLisnener {
+        void onPhotoItemClicked(PhotoItemDao dao);
+    }
 
     /**************
      * Methods
@@ -85,6 +91,41 @@ public class MainFragment extends Fragment {
         mPhotoListManager =  new PhotoListManager();
         lastPositionInteger = new MutableInteger(-1);
 
+        //************Persistance storage
+//        File dir = getContext().getFilesDir();
+//        File dir = getContext().getDir("Hello", Context.MODE_PRIVATE);
+//        File dir = getContext().getCacheDir();
+//        Log.d("Storage", String.valueOf(dir));
+//
+//        File file = new File(dir, "testfile.txt");
+//        try {
+//
+//            FileOutputStream fos = new FileOutputStream(file);
+//            fos.write("hello".getBytes());
+//            fos.close();
+//
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        //************SharedPreference
+//        SharedPreferences prefs = getContext().getSharedPreferences("dummy", Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = prefs.edit();
+//        // Add/Edit/Delete
+//        editor.putString("StringName", "StringValue");
+//        editor.apply();
+//
+//        SharedPreferences prefs2 = getContext().getSharedPreferences("dummy2", Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor2 = prefs2.edit();
+//        // Add/Edit/Delete
+//        editor2.putString("StringName2", "StringValue2");
+//        editor2.apply();
+//
+//        String valueFromSharedPref = prefs.getString("StringName2", null);
+//        Log.d("valueFromSharedPref", valueFromSharedPref);
+
     }
 
     private void initInstances(View rootView, Bundle savedInstanceState) {
@@ -97,6 +138,9 @@ public class MainFragment extends Fragment {
         mPhotoListAdapter = new PhotoListAdapter(lastPositionInteger);
         mPhotoListAdapter.setDao(mPhotoListManager.getPhotoItemCollectionDao());
         mListView.setAdapter(mPhotoListAdapter);
+
+
+        mListView.setOnItemClickListener(listViewItemClickListener);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.mainFragSwipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(pullToRefreshListener);
@@ -219,6 +263,25 @@ public class MainFragment extends Fragment {
      * Listener Zone
      ****************/
 
+    final AdapterView.OnItemClickListener listViewItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+
+            // Wrong, we should not do this
+//            Intent intent = new Intent(getContext(), MoreInfoActivity.class);
+//            startActivity(intent);
+
+            if (position < mPhotoListManager.getCount()) {
+
+                PhotoItemDao dao = mPhotoListManager.getPhotoItemCollectionDao().getData().get(position);
+                FragmentLisnener listener = (FragmentLisnener) getActivity();
+                listener.onPhotoItemClicked(dao);
+
+            }
+
+        }
+    };
+
     SwipeRefreshLayout.OnRefreshListener pullToRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
         @Override
         public void onRefresh() {
@@ -264,6 +327,8 @@ public class MainFragment extends Fragment {
 
         }
     };
+
+
 
     /*****************
      * Inner Class Zone
